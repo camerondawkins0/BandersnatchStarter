@@ -1,6 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
     <h1>Bandersnatch Data</h1>
-    <p>Monster Count: {{ count | safe }}</p>
+    <p class="data">Monster Count: {{ count | safe }}
+        <form action="/reset" method="POST">
+            <button type="submit">Reset</button>
+        </form>
+        <form action="/data" method="POST">
+            <button type="submit">Seed Database</button>
+        </form>
+    </p>
     {{ table | safe }}
 {% endblock %}
