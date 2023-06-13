@@ -14,7 +14,7 @@ class Database:
     """
 
     load_dotenv()
-    database = MongoClient(getenv("MONGO_DB"), tlsCAFile=None)["Database"]
+    database = MongoClient(getenv("MONGO_DB"), tls=True, tlsCAFile=where())["Database"]
 
     def __init__(self, collection: str = "Monsters"):
         """
@@ -73,4 +73,3 @@ class Database:
         - str: An HTML string representing the data in the collection as a table.
         """
         return self.dataframe().to_html() if self.count() > 0 else None
-
