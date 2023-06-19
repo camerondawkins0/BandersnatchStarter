@@ -6,7 +6,7 @@ from MonsterLab import Monster
 from pandas import DataFrame
 from pymongo import MongoClient
 
-import random
+import re
 
 class Database:
     """
@@ -70,8 +70,12 @@ class Database:
         Returns:
         - DataFrame: A pandas DataFrame containing the data from the collection.
         """
-        return DataFrame(self.collection.find(projection={"_id": False,
+        df = DataFrame(self.collection.find(projection={"_id": False,
                                                           "Timestamp": False}))
+        regex = r'[^0-9]'
+        df["Rarity"] = [int(re.sub(regex, "", x)) for x in df["Rarity"]]
+        
+        return df
 
     def html_table(self) -> str:
         """
