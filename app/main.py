@@ -10,7 +10,7 @@ from app.data import Database
 from app.graph import chart
 from app.machine import Machine
 
-SPRINT = 1
+SPRINT = 2
 APP = Flask(__name__)
 
 
@@ -30,11 +30,11 @@ def data():
         return render_template("data.html")
     
     db = Database()
+    db.seed(1500)
     return render_template(
         "data.html",
         count=db.count(),
         table=db.html_table(),
-        reset=db.reset()
     )
 
 @APP.route("/reset", methods=["GET", "POST"])
@@ -60,7 +60,7 @@ def view():
         df=db.dataframe(),
         x=x_axis,
         y=y_axis,
-        target=target,
+        target=target
     ).to_json()
     return render_template(
         "view.html",

@@ -24,22 +24,29 @@ class Database:
         - collection (str): The name of the collection to use in the database. Defaults to "Monsters".
         """
         self.collection = self.database[collection]
-        self.seed()
 
-    def seed(self, amount: int = random.randint(1000, 2000)):
+    def seed(self, amount: int):
         """
         Seed the database with randomly generated Monster data.
 
         Parameters:
         - amount (int): The number of Monsters to generate and insert into the database.
-            - Defaults to a random number between 1000 and 2000, inclusive.
         """
-        if self.count() > 0:
-            self.reset()
-            self.seed()
+        if self.collection.count_documents({}) > 0:
+            return
         else:
             monsters = [Monster().to_dict() for _ in range(amount)]
             self.collection.insert_many(monsters)
+        
+    def reseed(self, amount: int):
+        """
+        Reseed the database with randomly generated Monster data.
+
+        Parameters:
+        - amount (int): The number of Monsters to generate and insert into the database.
+        """
+        self.reset()
+        self.seed(amount)
 
     def reset(self):
         """
@@ -63,7 +70,8 @@ class Database:
         Returns:
         - DataFrame: A pandas DataFrame containing the data from the collection.
         """
-        return DataFrame(self.collection.find())
+        return DataFrame(self.collection.find(projection={"_id": False,
+                                                          "Timestamp": False}))
 
     def html_table(self) -> str:
         """
