@@ -9,8 +9,11 @@ from pandas import DataFrame
 from app.data import Database
 from app.graph import chart
 from app.machine import Machine
+from app.damage_parser import parse_damage
+from MonsterLab.monster_data import Random
 
-SPRINT = 2
+
+SPRINT = 3
 APP = Flask(__name__)
 
 
@@ -52,7 +55,7 @@ def view():
     if SPRINT < 2:
         return render_template("view.html")
     db = Database()
-    options = ["Level", "Health", "Energy", "Sanity", "Rarity"]
+    options = ["Level", "Health", "Energy", "Sanity", "Low", "High", "Rarity"]
     x_axis = request.values.get("x_axis") or options[1]
     y_axis = request.values.get("y_axis") or options[2]
     target = request.values.get("target") or options[4]
@@ -78,21 +81,25 @@ def model():
     if SPRINT < 3:
         return render_template("model.html")
     db = Database()
-    options = ["Level", "Health", "Energy", "Sanity", "Rarity"]
-    filepath = os.path.join("app", "model.joblib")
+    options = ["Health", "Energy", "Sanity", "Low", "High", "Rarity"]
+    filepath = os.path.join(os.path.dirname(__file__), "model.joblib")
     if not os.path.exists(filepath):
         df = db.dataframe()
         machine = Machine(df[options])
         machine.save(filepath)
     else:
         machine = Machine.open(filepath)
+
+    rand = Random()
     stats = [round(random_float(1, 250), 2) for _ in range(3)]
-    level = request.values.get("level", type=int) or random_int(1, 20)
+    level = request.values.get("level", type=int) or random_int(1, 84)
     health = request.values.get("health", type=float) or stats.pop()
     energy = request.values.get("energy", type=float) or stats.pop()
     sanity = request.values.get("sanity", type=float) or stats.pop()
+    damage = f"{level}d{rand.dice[rand.random_rank()]}{rand.bonus()}"
+    low, high, _ = parse_damage(damage)
     prediction, confidence = machine(DataFrame(
-        [dict(zip(options, (level, health, energy, sanity)))]
+        [dict(zip(options, (health, energy, sanity, low, high)))]
     ))
     info = machine.info()
     return render_template(

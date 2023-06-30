@@ -1,4 +1,5 @@
 from os import getenv
+from app.damage_parser import *
 
 from certifi import where
 from dotenv import load_dotenv
@@ -70,10 +71,24 @@ class Database:
         Returns:
         - DataFrame: A pandas DataFrame containing the data from the collection.
         """
-        df = DataFrame(self.collection.find(projection={"_id": False,
-                                                          "Timestamp": False}))
+        df = DataFrame(self.collection
+                       .find(projection={"_id": False,
+                                         "Timestamp": False
+                                         }))
+        
         regex = r'[^0-9]'
         df["Rarity"] = [int(re.sub(regex, "", x)) for x in df["Rarity"]]
+        
+        lows, highs, rolls = {'L': []}, {'H': []}, {'R': []}
+
+        for damage in df['Damage']:
+            low, high, roll = parse_damage(damage)
+            
+            lows['L'].append(low)
+            highs['H'].append(high)
+            rolls['R'].append(roll)
+            
+        df['Low'], df['High'], df['Roll'] = lows['L'], highs['H'], rolls['R']
         
         return df
 
