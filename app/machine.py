@@ -39,5 +39,5 @@ class Machine:
         return model
 
     def info(self):
-        print(f'Model:{self.name}')
-        print(f'Model Initialization Timestamp: {self.timestamp}')
+        return f"Model Name: {self.name}\t\n \
+            Timestamp: {self.timestamp}\n" 

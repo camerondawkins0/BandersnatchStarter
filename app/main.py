@@ -90,14 +90,14 @@ def model():
     else:
         machine = Machine.open(filepath)
 
-    rand = Random()
-    stats = [round(random_float(1, 250), 2) for _ in range(3)]
+    stats = [[round(random_float(1, 250), 2) for _ in range(3)],
+             [random_int(1, 84), random_int(232, 987)]]
     level = request.values.get("level", type=int) or random_int(1, 84)
-    health = request.values.get("health", type=float) or stats.pop()
-    energy = request.values.get("energy", type=float) or stats.pop()
-    sanity = request.values.get("sanity", type=float) or stats.pop()
-    damage = f"{level}d{rand.dice[rand.random_rank()]}{rand.bonus()}"
-    low, high, _ = parse_damage(damage)
+    health = request.values.get("health", type=float) or stats[0].pop()
+    energy = request.values.get("energy", type=float) or stats[0].pop()
+    sanity = request.values.get("sanity", type=float) or stats[0].pop()
+    low, high = (request.values.get("low", type=int), request.values.get("high", type=int)) or stats[1].pop()
+    
     prediction, confidence = machine(DataFrame(
         [dict(zip(options, (health, energy, sanity, low, high)))]
     ))
@@ -109,6 +109,8 @@ def model():
         health=health,
         energy=energy,
         sanity=sanity,
+        low=low,
+        high=high,
         prediction=prediction,
         confidence=f"{confidence:.2%}",
     )
